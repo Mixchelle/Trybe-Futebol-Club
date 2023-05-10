@@ -1,15 +1,14 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '.';
 
-
 export interface TeamAttributes {
   id: number;
-  team_name: string;
+  teamName: string;
 }
 
 export class Team extends Model<TeamAttributes> implements TeamAttributes {
   public id!: number;
-  public team_name!: string;
+  public teamName!: string;
 }
 
 Team.init(
@@ -20,7 +19,7 @@ Team.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    team_name: {
+    teamName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -31,7 +30,7 @@ Team.init(
     timestamps: false,
     modelName: 'Team',
     tableName: 'teams',
-  }
+  },
 );
 
 export default Team;
