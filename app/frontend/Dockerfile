@@ -8,7 +8,7 @@ WORKDIR /app-frontend
 COPY package*.json ./
 
 # Instalar as dependências Node
-RUN npm install
+RUN npm install --silent
 
 # Copiar o restante dos arquivos da aplicação para o container
 COPY . .
