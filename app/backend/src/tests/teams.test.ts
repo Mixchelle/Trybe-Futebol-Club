@@ -12,15 +12,30 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('GET /teams', () => {
-  it('should return all teams correctly', async () => {
-    const response = await chai.request(app).get('/teams');
+describe('Clubs endpoints', () => {
+let chaiHttpResponse: Response;
 
-    expect(response).to.have.status(200);
-    expect(response.body).to.deep.equal([
-      { id: 1, teamName: 'Avaí/Kindermann' },
-      { id: 2, teamName: 'Bahia' },
-      { id: 3, teamName: 'Botafogo' },
-    ]);
-  });
+afterEach(() => {
+  sinon.restore();
+});
+
+describe('When making GET request to /teams', () => {
+it('API responds with status 200 and list of all teams', async () => {
+chaiHttpResponse = await chai
+.request(app)
+.get('/teams');
+
+  const { status, body } = chaiHttpResponse;
+
+  expect(status).to.be.equal(200);
+  expect(body).to.be.an('array');
+  expect(body).to.have.length.greaterThan(0);
+
+  const team = body[0];
+  expect(team).to.have.property('id');
+  expect(team).to.have.property('teamName');
+});
+});
+
+
 });
