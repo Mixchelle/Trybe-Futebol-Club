@@ -12,15 +12,15 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('Clubs endpoints', () => {
+describe('Teams endpoints', () => {
 let chaiHttpResponse: Response;
 
 afterEach(() => {
   sinon.restore();
 });
 
-describe('When making GET request to /teams', () => {
-it('API responds with status 200 and list of all teams', async () => {
+describe('Ao fazer uma solicitação GET para /teams', () => {
+  it('a API responde com o status 200 e a lista de todos os times', async () => {
 chaiHttpResponse = await chai
 .request(app)
 .get('/teams');
@@ -37,8 +37,8 @@ chaiHttpResponse = await chai
 });
 });
 
-describe('When making GET request to /teams/:id', () => {
-  it('and team exists: API responds with status 200 and corresponding team data based on id', async () => {
+describe('Ao fazer uma solicitação GET para /teams/:id', () => {
+  it('e o time existe: a API responde com o status 200 e os dados correspondentes ao time com base no ID', async () => {
   chaiHttpResponse = await chai
   .request(app)
   .get('/teams/5');
@@ -51,8 +51,7 @@ describe('When making GET request to /teams/:id', () => {
     expect(body).to.have.property('teamName', 'Cruzeiro');
   });
   
-  it('and team does not exist: API responds with status 404 and correct message', async () => {
-    chaiHttpResponse = await chai
+  it('e o time não existe: a API responde com o status 404 e a mensagem correta', async () => {    chaiHttpResponse = await chai
       .request(app)
       .get('/teams/447');
   
@@ -63,4 +62,8 @@ describe('When making GET request to /teams/:id', () => {
     expect(body).to.have.property('message', 'Team not found');
   });
   })
+
+
+
+  
 });

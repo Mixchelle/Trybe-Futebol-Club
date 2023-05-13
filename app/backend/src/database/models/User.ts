@@ -1,9 +1,9 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '.';
 
-interface UserAttributes {
+export interface UserAttributes {
   id: number;
-  userName: string;
+  username: string;
   role: string;
   email: string;
   password: string;
@@ -11,7 +11,7 @@ interface UserAttributes {
 
 class User extends Model<UserAttributes> {
   public id!: number;
-  public userName!: string;
+  public username!: string;
   public role!: string;
   public email!: string;
   public password!: string;
@@ -25,7 +25,7 @@ User.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    userName: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
     },
