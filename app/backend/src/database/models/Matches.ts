@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import db from '.';
 import Team from './Team';
 
-interface MatchAttributes {
+export interface MatchAttributes {
   id: number;
   homeTeamId: number;
   homeTeamGoals: number;
