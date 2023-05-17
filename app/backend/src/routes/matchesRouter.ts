@@ -1,8 +1,14 @@
 import { Router } from 'express';
-import MatcherController from '../controllers/matcheControler';
+import MatchController from '../controllers/matcheControler';
+import validateToken from '../middleware/validateToken';
 
-const matcheRouter = Router();
+const matchesRouter = Router();
 
-matcheRouter.get('/', MatcherController.getAllMatches);
+matchesRouter.get('/', MatchController.getAllMatches);
 
-export default matcheRouter;
+matchesRouter.patch('/:id', validateToken, MatchController.updateMatch);
+matchesRouter.patch('/:id/finish', validateToken, MatchController.finishMatch);
+
+matchesRouter.post('/', validateToken, MatchController.createMatch);
+
+export default matchesRouter;

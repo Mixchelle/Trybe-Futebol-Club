@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import teamsRouter from './teamRoutes';
 import loginRouter from './loginRouter';
-import matcheRouter from './matchesRouter';
+import matchesRouter from './matchesRouter';
 
 const router = Router();
 
 router.use('/teams', teamsRouter);
 router.use('/login', loginRouter);
-router.use('/matches', matcheRouter);
+router.use('/matches', matchesRouter);
 
 export default router;

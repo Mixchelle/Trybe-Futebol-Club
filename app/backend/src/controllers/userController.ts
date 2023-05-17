@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import userService from '../services/userService';
+import UserService from '../services/userService';
 
-const userController = {
-  login: async (req: Request, res: Response) => {
+class UserController {
+  public static async login(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
-      const token = await userService.login(email, password);
+      const token = await UserService.login(email, password);
       if (typeof token !== 'string') {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
@@ -13,15 +13,15 @@ const userController = {
     } catch (error) {
       return res.status(401).json({ message: error });
     }
-  },
+  }
 
-  getRole: async (req: Request, res: Response) => {
+  public static async getRole(req: Request, res: Response) {
     try {
       const token = req.headers.authorization;
       if (!token) {
         return res.status(401).json({ message: 'Token not found' });
       }
-      const user = await userService.getUserByToken(token);
+      const user = await UserService.getUserByToken(token);
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
@@ -29,7 +29,7 @@ const userController = {
     } catch (error) {
       return res.status(500).json({ message: 'Internal server error' });
     }
-  },
-};
+  }
+}
 
-export default userController;
+export default UserController;

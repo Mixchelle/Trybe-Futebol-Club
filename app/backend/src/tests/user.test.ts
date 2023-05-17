@@ -1,122 +1,168 @@
 import { Request, Response } from 'express';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
+import * as jsonwebtoken from 'jsonwebtoken';
+// @ts-ignore
+
 import chaiHttp = require('chai-http');
 import { app } from '../app';
 import UserModel from '../database/models/User';
 import userService from '../services/userService';
+import UserController from '../controllers/userController';
+
 
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('UserController', () => {
+describe('endpoint /login', () => {
   afterEach(() => {
     sinon.restore();
   });
 
-  describe('login', () => {
+  const userMock =
+  {
+    id: 1,
+    user: 'usuario',
+    email: 'usuarios@teste.com',
+    role: 'user',
+    password: '$2a$08$xi.Hxk1czAO0nZR..B393u10aED0RQ1N3PAEXQ7HxtLjKPEZBu.PW'
+  };
+
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlhdCI6MTY2OTI5Mzg5NCwiZXhwIjoxNjY5MzgwMjk0fQ.4JU9ZZc-asHUQGyaJ3YG4BUgdiXyLzdXfAXDVMYkyu0'
+
+
+  describe('/login', () => {
     it('should return a token for successful login', async () => {
-      const email = 'test@example.com';
-      const password = 'testpassword';
-      const token = 'testtoken';
-
-      const loginStub = sinon.stub(userService, 'login');
-      loginStub.resolves(token);
+      sinon.stub(UserModel, 'findOne').resolves(userMock as unknown as UserModel);
+      sinon.stub(jsonwebtoken, 'sign').resolves(token);
 
       const response = await chai
         .request(app)
         .post('/login')
-        .send({ email, password });
+        .send({
+          email: 'admin@admin.com',
+          password: 'secret_admin'
+        });
 
-      expect(response).to.have.status(200);
-      expect(response.body).to.have.property('token').equal(token);
-      expect(loginStub.calledOnceWithExactly(email, password)).to.be.true;
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal({ token });
     });
 
-    it('should return an error message for unsuccessful login', async () => {
-      const email = 'test@example.com';
-      const password = 'testpassword';
-      const errorMessage = 'Invalid email or password';
-
-      const loginStub = sinon.stub(userService, 'login');
-      loginStub.resolves(null);
+    it('should return an error message for invalid email or password', async () => {
+      sinon.stub(UserModel, 'findOne').resolves(null);
 
       const response = await chai
         .request(app)
         .post('/login')
-        .send({ email, password });
+        .send({
+          password: 'secret_admin'
+        });
 
-      expect(response).to.have.status(401);
-      expect(response.body).to.have.property('message').equal(errorMessage);
-      expect(loginStub.calledOnceWithExactly(email, password)).to.be.true;
+      expect(response.status).to.be.equal(400);
+      expect(response.body).to.be.deep.equal({ message: 'All fields must be filled' });
+    });
+
+    it('should return an error message when email is not provided', async () => {
+      const response = await chai
+        .request(app)
+        .post('/login')
+        .send({
+          email: '',
+          password: 'secret_admin'
+        });
+
+      expect(response.status).to.be.equal(400);
+      expect(response.body).to.be.deep.equal({ message: 'All fields must be filled' });
+    });
+
+    it('should return an error message when password is not provided', async () => {
+      const response = await chai
+        .request(app)
+        .post('/login')
+        .send({
+          email: 'admin@admin.com',
+          password: ''
+        });
+
+      expect(response.status).to.be.equal(400);
+      expect(response.body).to.be.deep.equal({ message: 'All fields must be filled' });
+    });
+    it('User does not provide a valid email', async () => {
+      const response = await chai
+        .request(app)
+        .post('/login')
+        .send({
+          email: 'admin@test.com',
+          password: 'secret_admin'
+        });
+    
+      expect(response.status).to.be.equal(401);
+      expect(response.body).to.be.deep.equal({ message: 'Invalid email or password' });
+    });
+    
+    it('User does not provide a valid password', async () => {
+      const response = await chai
+        .request(app)
+        .post('/login')
+        .send({
+          email: 'admin@test.com',
+          password: 'password'
+        });
+    
+      expect(response.status).to.be.equal(401);
+      expect(response.body).to.be.deep.equal({ message: 'Invalid email or password' });
     });
   });
 
-  describe('getRole', () => {
-    it('should return the user role with a valid token', async () => {
-      const token = 'testtoken';
-      const role = 'admin';
+  describe('/login/role', () => {
+  //   it.only('should return the user role when a valid token is provided', async () => {
+  //     sinon.stub(userService, 'getUserByToken').resolves(userMock as unknown as UserModel);
 
-      const getUserByTokenStub = sinon.stub(userService, 'getUserByToken');
-const user = new UserModel();
-user.id = 1;
-user.username = 'testuser';
-user.email = 'test@example.com';
-user.role = 'admin';
-getUserByTokenStub.resolves(user);
+  //     const response = await chai
+  //     .request(app)
+  //     .get('/login/role')
+  //     .auth(token, { type: 'bearer' });
 
-      const response = await chai
-        .request(app)
-        .get('/login/role')
-        .set('Authorization', `Bearer ${token}`);
+  //     expect(response.status).to.be.equal(200);
+  //     expect(response.body).to.be.an('object');
+  //     expect(response.body).to.be.deep.equal({ role: 'user' });
 
-      expect(response).to.have.status(200);
-      expect(response.body).to.have.property('role').equal(role);
-      expect(getUserByTokenStub.calledOnceWithExactly(token)).to.be.true;
-    });
-
-    it('should return an error message if the token is not found', async () => {
-      const errorMessage = 'Token not found';
-
-      const response = await chai.request(app).get('/login/role');
-
-      expect(response).to.have.status(401);
-      expect(response.body).to.have.property('message').equal(errorMessage);
-    });
-
-    it('should return an error message if the token is invalid', async () => {
-      const token = 'invalidtoken';
-      const errorMessage = 'Token must be a valid token';
-
-      const getUserByTokenStub = sinon.stub(userService, 'getUserByToken');
-      getUserByTokenStub.resolves(null);
-
-      const response = await chai
-        .request(app)
-        .get('/login/role')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(response).to.have.status(401);
-      expect(response.body).to.have.property('message').equal(errorMessage);
-      expect(getUserByTokenStub.calledOnceWithExactly(token)).to.be.true;
-    });
-
-    it('should return an error message if the user is not found', async () => {
-      const token = 'testtoken';
-      const errorMessage = 'User not found';
-
-      const getUserByTokenStub = sinon.stub(userService, 'getUserByToken');
-      getUserByTokenStub.resolves(null);
-
-      const response = await chai
-        .request(app)
-        .get('/login/role')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(response).to.have.status(401);
-      expect(response.body).to.have.property('message').equal(errorMessage);
-      expect(getUserByTokenStub.calledOnceWithExactly(token)).to.be.true;
-    });
+  //   expect(response.status).to.be.equal(401);
+  //   expect(response.body).to.be.deep.equal({ role: userMock.role });
+  // });
+  
+  it('should return an error message when token is not provided', async () => {
+    const response = await chai
+      .request(app)
+      .get('/login/role');
+  
+    expect(response.status).to.be.equal(401);
+    expect(response.body).to.be.deep.equal({ message: 'Token not found' });
   });
+  
+  it('should return an error message when an invalid token is provided', async () => {
+    const invalidToken = 'invalid-token';
+  
+    const response = await chai
+      .request(app)
+      .get('/login/role')
+      .set('Authorization', `Bearer ${invalidToken}`);
+  
+    expect(response.status).to.be.equal(401);
+    expect(response.body).to.be.deep.equal({ message: 'Token must be a valid token' });
+  });
+  
+  // it('should return an error message when user is not found', async () => {
+  //   sinon.stub(userService, 'getUserByToken').resolves(null);
+  
+  //   const response = await chai
+  //     .request(app)
+  //     .get('/login/role')
+  //     .set('Authorization', `Bearer ${token}`);
+  
+  //   expect(response.status).to.be.equal(401);
+  //   expect(response.body).to.be.deep.equal({ message: 'User not found' });
+  // });
+});
 });

@@ -12,12 +12,12 @@ export interface MatchAttributes {
 }
 
 class Match extends Model<MatchAttributes> {
-  public id!: number;
-  public homeTeamId!: number;
-  public homeTeamGoals!: number;
-  public awayTeamId!: number;
-  public awayTeamGoals!: number;
-  public inProgress!: boolean;
+  declare id: number;
+  declare homeTeamId: number;
+  declare homeTeamGoals: number;
+  declare awayTeamId: number;
+  declare awayTeamGoals: number;
+  declare inProgress: boolean;
 }
 
 Match.init(
@@ -38,19 +38,15 @@ Match.init(
     },
     homeTeamGoals: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     awayTeamId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     awayTeamGoals: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     inProgress: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
     },
   },
   {
@@ -62,10 +58,7 @@ Match.init(
   },
 );
 
-Match.belongsTo(Team, { foreignKey: 'homeTeamId', as: 'homeTeams' });
-Match.belongsTo(Team, { foreignKey: 'awayTeamId', as: 'awayTeams' });
-
-Team.hasMany(Match, { foreignKey: 'homeTeamId', as: 'homeMatches' });
-Team.hasMany(Match, { foreignKey: 'awayTeamId', as: 'awayMatches' });
+Match.belongsTo(Team, { foreignKey: 'homeTeamId', as: 'homeTeam' });
+Match.belongsTo(Team, { foreignKey: 'awayTeamId', as: 'awayTeam' });
 
 export default Match;

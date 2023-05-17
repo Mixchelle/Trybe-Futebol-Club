@@ -3,7 +3,7 @@ import TeamController from '../controllers/teamController';
 
 const teamRouter = Router();
 
-teamRouter.get('/', (req, res) => TeamController.getAllTeams(req, res));
-teamRouter.get('/:id', (req, res) => TeamController.getTeamById(req, res));
+teamRouter.get('/', TeamController.getAllTeams);
+teamRouter.get('/:id', TeamController.getTeamById);
 
 export default teamRouter;
