@@ -9,6 +9,7 @@ import { app } from '../app';
 import UserModel from '../database/models/User';
 import userService from '../services/userService';
 import UserController from '../controllers/userController';
+import UserService from '../services/userService';
 
 
 chai.use(chaiHttp);
@@ -113,6 +114,12 @@ describe('endpoint /login', () => {
       expect(response.status).to.be.equal(401);
       expect(response.body).to.be.deep.equal({ message: 'Invalid email or password' });
     });
+    it.only('função getbytoken', async () =>{
+
+      const t = await UserService.getUserByToken(token);
+
+      expect(t).to.be.deep.equal({t})
+    })
   });
 
   describe('/login/role', () => {

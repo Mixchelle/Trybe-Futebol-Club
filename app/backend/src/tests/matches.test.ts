@@ -155,6 +155,7 @@ describe('Matches endpoint', () => {
       expect(response.status).to.be.equal(404);
       expect(response.body).to.be.deep.equal({ message: 'There is no team with such id!' });
     });
+  
     });
     describe('teste 80%', async () => {
       it('20 - Deve retornar status 401 e a mensagem "Token not found" se não for informado um token', async () => {
