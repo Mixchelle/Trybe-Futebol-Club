@@ -59,7 +59,7 @@ class MatchService {
   }): Promise<{ message: string }> {
     const match = await MatchModel.findByPk(id);
     if (!match) {
-      throw new Error('Match not found');
+      return { message: 'Match not found' };
     }
     match.homeTeamGoals = matches.homeTeamGoals;
     match.awayTeamGoals = matches.awayTeamGoals;

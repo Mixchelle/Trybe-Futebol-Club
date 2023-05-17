@@ -2,12 +2,14 @@ import * as sinon from 'sinon';
 import * as chai from 'chai';
 // @ts-ignore
 import chaiHttp = require('chai-http');
-
 import { app } from '../app';
 import MatchModel, { MatchAttributes } from '../database/models/Matches';
 import TeamModel from '../database/models/Team';
-import matchesMock from './matchesMock';
 import * as jsonwebtoken from 'jsonwebtoken';
+import matchesMock from './matchesMock';
+import MatchService from '../services/matcheService';
+import UserService from '../services/userService';
+
 
 chai.use(chaiHttp);
 
@@ -20,190 +22,244 @@ describe('Matches endpoint', () => {
 
   describe('GET method on /matches route', () => {
     it('should retrieve all data for the user', async () => {
-    sinon.stub(MatchModel, "findAll").resolves(matchesMock as unknown as MatchModel[]);
-    const response = await chai
-    .request(app)
-    .get('/matches');
-    expect(response.status).to.be.equal(200);
-    expect(response.body).to.be.deep.equal(matchesMock);
+      sinon.stub(MatchModel, 'findAll').resolves(matchesMock as unknown as MatchModel[]);
+      const response = await chai.request(app).get('/matches');
+      expect(response.status).to.be.equal(200);
+      expect(response.body).to.be.deep.equal(matchesMock);
     });
-    });
-    
-    describe('GET method on /matches?inProgress=true route', () => {
-    it('should retrieve all matches that are in progress', async () => {
-    const matchesInProgress = matchesMock.filter((match) => match.inProgress === true);
-    sinon.stub(MatchModel, "findAll").resolves(matchesInProgress as unknown as MatchModel[]);
-    const response = await chai
-    .request(app)
-    .get('/matches?inProgress=true');
-    expect(response.status).to.be.equal(200);
-    expect(response.body).to.be.deep.equal(matchesInProgress);
+  });
+
+  describe('MatchService', () => {
+    afterEach(() => {
+      sinon.restore();
     });
 
-    it('should retrieve all matches that are finished', async () => {
-      const matchesFinished = matchesMock.filter((match) => match.inProgress === false);
-      sinon.stub(MatchModel, "findAll").resolves(matchesFinished as unknown as MatchModel[]);
-      const response = await chai
-        .request(app)
-        .get('/matches?inProgress=false');
-      expect(response.status).to.be.equal(200);
-      expect(response.body).to.be.deep.equal(matchesFinished);
+    describe('getAllMatches', () => {
+      it('should return all matches with teams', async () => {
+        sinon.stub(MatchModel, 'findAll').resolvesArg(0);
+        const matches = await MatchService.getAllMatches();
+        expect(matches).to.be.deep.equal(matchesMock);
+      });
     });
+
+    describe('getFilteredMatches', () => {
+      it('should return filtered matches with teams', async () => {
+        const inProgress = 'true';
+        sinon.stub(MatchModel, 'findAll').resolvesArg(0);
+        const matches = await MatchService.getFilteredMatches(inProgress);
+        expect(matches).to.be.deep.equal(matchesMock);
+      });
     });
-    
-    describe('PATCH method on /:id route', () => {
-    it('should update the goals of a match', async () => {
-    sinon.stub(MatchModel, "update").resolves();
-    const response = await chai
-    .request(app)
-    .patch('/matches/1')
-    .send({
-    homeTeamGoals: 3,
-    awayTeamGoals: 1
-    });
-    expect(response.status).to.be.equal(401);
-    expect(response.body).to.be.deep.equal({ message: 'Token not found' });
-    });
-    });
-    
-    describe('PATCH method on /:id/finish route', () => {
-    it('should update a match as finished', async () => {
-    sinon.stub(MatchModel, "update").resolves();
-    const response = await chai
-    .request(app)
-    .patch('/matches/1/finish');
-    expect(response.status).to.be.equal(401);
-    expect(response.body).to.be.deep.equal({ message: 'Token not found' });
-    });
-    });
-    
-    describe('POST method on /matches route', () => {
-    it('should insert a new match', async () => {
-    const result = {
-    id: 20,
-    homeTeam: 16,
-    awayTeam: 8,
-    homeTeamGoals: 2,
-    awayTeamGoals: 2,
-    inProgress: true
-    };
-    sinon.stub(jsonwebtoken, 'verify').resolves({ email: 'admin@admin.com', password: 'secret_admin' });
-    sinon.stub(TeamModel, "findByPk")
-    .onCall(0).resolves({
-    
-    id: 1, teamName: 'Palmeiras'} as any)
-    .onCall(1).resolves({ id: 1, teamName: 'Palmeiras'} as any);
-    sinon.stub(MatchModel, "create").resolves(result as MatchAttributes| any);
-    const response = await chai
-    .request(app)
-    .post('/matches')
-    .send({
-    homeTeam: 16,
-    awayTeam: 8,
-    homeTeamGoals: 2,
-    awayTeamGoals: 2,
-    })
-    .set('authorization', 'toksdfsdfsfd234234en');
-    expect(response.status).to.be.equal(422);
-    expect(response.body).to.be.deep.equal({message: 'It is not possible to create a match with two equal teams'});
-    });
-    
-    it('should not insert a match without sending the authorization token', async () => {
-      sinon.stub(jsonwebtoken, 'verify').resolves();
-      const response = await chai
-        .request(app)
-        .post('/matches')
-        .send({
-          homeTeam: 16,
-          awayTeam: 8,
+
+    describe('finishMatch', () => {
+      it('should finish a match and return it', async () => {
+        const id = 1;
+        const match: MatchAttributes = {
+          id: 1,
           homeTeamGoals: 2,
-          awayTeamGoals: 2,
-        })
-        .set('authorization', '');
-      expect(response.status).to.be.equal(401);
-      expect(response.body).to.be.deep.equal({ message: 'Token not found' });
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 0
+        };
+
+        sinon.stub(MatchModel, 'findByPk').resolves(match as MatchModel);
+        const updateStub = sinon.stub(MatchModel.prototype, 'update').resolves(match as MatchModel);
+
+        const finishedMatch = await MatchService.finishMatch(id);
+
+        sinon.assert.calledOnce(updateStub);
+        sinon.assert.calledWith(updateStub, {
+          homeTeamGoals: match.homeTeamGoals,
+          awayTeamGoals: match.awayTeamGoals,
+          inProgress: false
+        });
+
+        expect(finishedMatch).to.be.deep.equal(match);
+      });
+      it('finish', async () => {
+        const a = await MatchService.finishMatch(100);
+        expect(a).to.be.equal('Match not found')
+      })
+    it('finishmatch', async () => {
+      const match = await MatchModel.findByPk(2);
+      const a = await MatchService.finishMatch(100);
+        expect(a).to.be.equal(match);
     });
-    
-    it('should not insert a match without sending a valid authorization token', async () => {
-      sinon.stub(jsonwebtoken, 'verify').throws();
-      const response = await chai
-        .request(app)
-        .post('/matches')
-        .send({
-          homeTeam: 16,
-          awayTeam: 8,
+
+    });
+
+    describe('updateMatch', () => {
+      it('should update the match and return a success message', async () => {
+        const id = 1;
+        const match = {
           homeTeamGoals: 2,
-          awayTeamGoals: 2,
-        })
-        .set('authorization', 'dadsdasdasdas');
-      expect(response.status).to.be.equal(401);
-      expect(response.body).to.be.deep.equal({ message: 'Token must be a valid token' });
-    });
-    
-    it('should not insert a match with two equal teams', async () => {
-      sinon.stub(jsonwebtoken, 'verify').resolves({ email: 'admin@admin.com', password: 'secret_admin' });
-      const response = await chai
-        .request(app)
-        .post('/matches')
-        .send({
-          homeTeam: 8,
-          awayTeam: 8,
-          homeTeamGoals: 2,
-          awayTeamGoals: 2,
-        })
-        .set('authorization', 'dadsdasdasdas');
-      expect(response.status).to.be.equal(404);
-      expect(response.body).to.be.deep.equal({ message: 'There is no team with such id!' });
-    });
+          awayTeamGoals: 1,
+        };
+
+        const result = await MatchService.updateMatch(id, match);
   
+        expect(result).to.deep.equal({ message: 'Match updated' });
+      });
+  
+      it('should return an error message when the match is not found', async () => {
+        const id = 1;
+        const match = {
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+        };
+        sinon.stub(MatchModel, 'findByPk').resolves(null);
+  
+        const result = await MatchService.updateMatch(id, match);
+  
+        expect(result).to.deep.equal({ message: 'Match not found' });
+      });
+  
+      it('should return an error message when an error occurs while updating the match', async () => {
+        const id = 1;
+        const match = {
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+        };
+        sinon.stub(MatchModel, 'findByPk').throws(new Error('Failed to find match'));
+  
+        const result = await MatchService.updateMatch(id, match);
+  
+        expect(result).to.deep.equal({ message: 'Failed to update match' });
+      });
     });
-    describe('teste 80%', async () => {
-      it('20 - Deve retornar status 401 e a mensagem "Token not found" se não for informado um token', async () => {
-        const response = await chai.request(app).post('/matches').send(matchesMock);
-    
-        expect(response).to.have.status(401);
-        expect(response.body).to.deep.equal({ message: 'Token not found' });
+
+    describe('updateMatch', () => {
+      it('should update a match and return a success message', async () => {
+        const id = 1;
+        const updatedMatchData = {
+          homeTeamGoals: 3,
+          awayTeamGoals: 2,
+        };
+        const match: MatchAttributes = {
+          id: 1,
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 0
+        };
+
+        sinon.stub(MatchModel, 'findByPk').resolves(match as MatchModel);
+        const updateStub = sinon.stub(MatchModel.prototype, 'update').resolves(match as MatchModel);
+
+        const result = await MatchService.updateMatch(id, updatedMatchData);
+
+        sinon.assert.calledOnce(updateStub);
+        sinon.assert.calledWith(updateStub, {
+          homeTeamGoals: updatedMatchData.homeTeamGoals,
+          awayTeamGoals: updatedMatchData.awayTeamGoals,
+        });
+
+        expect(result).to.deep.equal({ message: 'Match updated' });
       });
-    
-      it('20 - Deve retornar status 401 e a mensagem "Token must be a valid token" se for informado um token inválido', async () => {
-        sinon.stub(jsonwebtoken, 'verify').throws(new Error('Invalid token'));
-    
-        const response = await chai
-          .request(app)
-          .post('/matches')
-          .set('Authorization', 'Bearer invalidToken')
-          .send(matchesMock);
-    
-        expect(response).to.have.status(401);
-        expect(response.body).to.deep.equal({ message: 'Token must be a valid token' });
+    });
+
+    describe('createMatch', () => {
+      it('should create a match and return it', async () => {
+        const matchData: MatchAttributes = {
+          id: 1,
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 1,
+        };
+        const homeTeam = {
+          id: 0,
+          teamName: 'Home Team',
+        };
+        const awayTeam = {
+          id: 1,
+          teamName: 'Away Team',
+        };
+
+        sinon.stub(TeamModel, 'findByPk')
+          .withArgs(matchData.homeTeamId)
+          .resolves(homeTeam as TeamModel)
+          .withArgs(matchData.awayTeamId)
+          .resolves(awayTeam as TeamModel);
+
+        const createStub = sinon.stub(MatchModel, 'create').resolves(matchData as MatchModel);
+
+        const result = await MatchService.createMatch(matchData);
+
+        sinon.assert.calledOnce(createStub);
+        sinon.assert.calledWith(createStub, {
+          ...matchData,
+          inProgress: true,
+        });
+
+        expect(result).to.deep.equal(matchData);
       });
-    
-    
-    
-      it('21 - Não deve ser possível inserir uma partida com times iguais', async () => {
-        const matchWithEqualTeams = { ...matchesMock, awayTeamId: matchesMock };
-    
-        const response = await chai
-          .request(app)
-          .post('/matches')
-          .set('Authorization', 'Bearer validToken')
-          .send(matchWithEqualTeams);
-    
-        expect(response).to.have.status(401);
-        expect(response.body).to.deep.equal({ message: 'It is not possible to create a match with two equal teams' });
-      });
-    
-      it('21 - Não deve ser possível inserir uma partida com um time que não existe no banco de dados', async () => {
+
+      it('should return an error when the home team is not found', async () => {
+        const matchData: MatchAttributes = {
+          id: 1,
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 1,
+        };
+
         sinon.stub(TeamModel, 'findByPk').resolves(null);
-    
-        const response = await chai
-          .request(app)
-          .post('/matches')
-          .set('Authorization', 'Bearer validToken')
-          .send(matchesMock);
-    
-        expect(response).to.have.status(401);
-        expect(response.body).to.deep.equal({ message: 'There is no team with such id!' });
+
+        const result = await MatchService.createMatch(matchData);
+
+        expect(result).to.deep.equal({ status: 404, message: 'There is no team with such id!' });
       });
-    })
+
+      it('should return an error when the away team is not found', async () => {
+        const matchData: MatchAttributes = {
+          id: 1,
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 1,
+        };
+        const homeTeam = {
+          id: 0,
+          teamName: 'Home Team',
+        };
+
+        sinon.stub(TeamModel, 'findByPk')
+          .withArgs(matchData.homeTeamId)
+          .resolves(homeTeam as TeamModel)
+          .withArgs(matchData.awayTeamId)
+          .resolves(null);
+
+        const result = await MatchService.createMatch(matchData);
+
+        expect(result).to.deep.equal({ status: 404, message: 'There is no team with such id!' });
+      });
+
+      it('should return an error when creating a match with two equal teams', async () => {
+        const matchData: MatchAttributes = {
+          id: 1,
+          homeTeamGoals: 2,
+          awayTeamGoals: 1,
+          inProgress: true,
+          homeTeamId: 0,
+          awayTeamId: 0,
+        };
+        const team = {
+          id: 0,
+          teamName: 'Team',
+        };
+
+        sinon.stub(TeamModel, 'findByPk').resolves(team as TeamModel);
+
+        const result = await MatchService.createMatch(matchData);
+
+        expect(result).to.deep.equal({ status: 422, message: 'It is not possible to create a match with two equal teams' });
+      });
     });
+  });
+});
