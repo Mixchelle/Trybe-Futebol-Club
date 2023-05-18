@@ -8,7 +8,7 @@ export interface MatchReturnAtributes {
   inProgress: boolean;
 }
 
-export default [
+const expectedHomeData = [
   {
     id: 1,
     homeTeam: 16,
@@ -682,3 +682,6 @@ export default [
     }
   }
 ]
+
+
+export default expectedHomeData;

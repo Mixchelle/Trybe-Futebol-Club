@@ -15,7 +15,7 @@ const initialPoints = {
   goalsFavor: 0,
   goalsOwn: 0,
   goalsBalance: 0,
-  efficiency: 0,
+  efficiency: '0',
   name: '',
 };
 
@@ -34,10 +34,10 @@ class LeaderboardService {
     return result;
   }
 
-  private static calculateEfficiency(points: number, games: number): number {
-    if (games === 0) return 0;
+  private static calculateEfficiency(points: number, games: number): string {
+    if (games === 0) return '0';
     const efficiency = (points / (games * 3)) * 100;
-    return parseFloat(efficiency.toFixed(2));
+    return efficiency.toFixed(2).toString();
   }
 
   private static async calculateTeamStats(matches: MatchAttributes[]): Promise<TeamStats> {
@@ -105,7 +105,18 @@ class LeaderboardService {
   }
 
   public static sortTeamsByPoints(teams: HomeData[]): HomeData[] {
-    return teams.sort((a, b) => b.totalPoints - a.totalPoints);
+    return teams.sort((a, b) => {
+      if (a.totalPoints === b.totalPoints) {
+        if (a.totalVictories === b.totalVictories) {
+          if (a.goalsBalance === b.goalsBalance) {
+            return b.goalsFavor - a.goalsFavor;
+          }
+          return b.goalsBalance - a.goalsBalance;
+        }
+        return a.totalVictories - b.totalVictories;
+      }
+      return b.totalPoints - a.totalPoints;
+    });
   }
 
   public static async getHomeLeaderboard(): Promise<HomeData[]> {
