@@ -84,6 +84,17 @@ class MatchService {
     });
     return match;
   }
+
+  public static async getIn(inProgress: boolean) {
+    const matches = MatchModel.findAll({
+      where: { inProgress },
+      include: [
+        { model: TeamModel, as: 'awayTeam', attributes: ['teamName'] },
+        { model: TeamModel, as: 'homeTeam', attributes: ['teamName'] },
+      ],
+    });
+    return matches;
+  }
 }
 
 export default MatchService;
