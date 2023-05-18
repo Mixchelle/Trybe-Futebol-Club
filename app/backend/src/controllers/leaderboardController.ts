@@ -3,7 +3,7 @@ import LeaderboardService from '../services/leaderboardService';
 import { HomeData } from '../interfaces/leaderboard';
 
 class LeaderboardController {
-  public static async getHome(req: Request, res: Response): Promise<void> {
+  public static async getHome(_req: Request, res: Response): Promise<void> {
     try {
       const homeData: HomeData[] = await LeaderboardService.getHomeLeaderboard();
       res.status(200).json(homeData);
@@ -12,7 +12,7 @@ class LeaderboardController {
     }
   }
 
-  public static async getAway(req: Request, res: Response): Promise<void> {
+  public static async getAway(_req: Request, res: Response): Promise<void> {
     try {
       const awayData: HomeData[] = await LeaderboardService.getAwayLeaderboard();
       res.status(200).json(awayData);
