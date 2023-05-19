@@ -19,17 +19,18 @@ const initialPoints = {
   name: '',
 };
 
-class LeaderboardService {
-  private static calculateTotalPoints(homeTeamGoals: number, awayTeamGoals: number): TeamStats {
+class LeaderboardServiceAway {
+  private static calculateTotalPointsAway(homeTeamGoals: number, awayTeamGoals: number): TeamStats {
     const result: TeamStats = { ...initialPoints };
-    if (homeTeamGoals > awayTeamGoals) {
+    if (awayTeamGoals > homeTeamGoals) {
       result.totalPoints = 3;
       result.totalVictories = 1;
-    } else if (homeTeamGoals < awayTeamGoals) {
-      result.totalLosses = 1;
-    } else {
+    } else if (awayTeamGoals === homeTeamGoals) {
       result.totalPoints = 1;
       result.totalDraws = 1;
+    } else {
+      result.totalPoints = 0;
+      result.totalLosses = 1;
     }
     return result;
   }
@@ -40,46 +41,46 @@ class LeaderboardService {
     return efficiency.toFixed(2).toString();
   }
 
-  private static async calculateTeamStats(matches: MatchAttributes[]): Promise<TeamStats> {
+  private static async calculateTeamStatsAway(matches: MatchAttributes[]): Promise<TeamStats> {
     const result: TeamStats = { ...initialPoints };
     matches.forEach((match) => {
       if (!match.inProgress) {
         result.totalGames += 1;
         const { homeTeamGoals, awayTeamGoals } = match;
-        const matchResult = this.calculateTotalPoints(homeTeamGoals, awayTeamGoals);
+        const matchResult = this.calculateTotalPointsAway(homeTeamGoals, awayTeamGoals);
         result.totalPoints += matchResult.totalPoints;
         result.totalVictories += matchResult.totalVictories;
         result.totalDraws += matchResult.totalDraws;
         result.totalLosses += matchResult.totalLosses;
-        result.goalsFavor += homeTeamGoals;
-        result.goalsOwn += awayTeamGoals;
-        result.goalsBalance += homeTeamGoals - awayTeamGoals;
+        result.goalsFavor += awayTeamGoals;
+        result.goalsOwn += homeTeamGoals;
+        result.goalsBalance += awayTeamGoals - homeTeamGoals;
       }
     });
     result.efficiency = this.calculateEfficiency(result.totalPoints, result.totalGames);
     return result;
   }
 
-  public static async getHomeData(teams: TeamAttributes[], matches: MatchAttributes[]):
+  public static async getAwayData(teams: TeamAttributes[], matches: MatchAttributes[]):
   Promise<HomeData[]> {
-    const homeData: HomeData[] = await Promise.all(teams.map(async (team) => {
-      const teamMatches = matches.filter((match) => match.homeTeamId === team.id);
-      const teamStats = await this.calculateTeamStats(teamMatches);
-      const efficiency = this.calculateEfficiency(teamStats.totalPoints, teamStats.totalGames);
-      return { name: team.teamName,
-        totalPoints: teamStats.totalPoints,
-        totalGames: teamStats.totalGames,
-        totalVictories: teamStats.totalVictories,
-        totalDraws: teamStats.totalDraws,
-        totalLosses: teamStats.totalLosses,
-        goalsFavor: teamStats.goalsFavor,
-        goalsOwn: teamStats.goalsOwn,
-        goalsBalance: teamStats.goalsBalance,
-        efficiency,
-      };
-    }));
+    const awayData = await Promise.all(
+      teams.map(async (team) => {
+        const teamMatches = matches.filter((match) => match.awayTeamId === team.id);
+        const teamStats = await this.calculateTeamStatsAway(teamMatches);
+        return { name: team.teamName,
+          totalPoints: teamStats.totalPoints,
+          totalGames: teamStats.totalGames,
+          totalVictories: teamStats.totalVictories,
+          totalDraws: teamStats.totalDraws,
+          totalLosses: teamStats.totalLosses,
+          goalsFavor: teamStats.goalsFavor,
+          goalsOwn: teamStats.goalsOwn,
+          goalsBalance: teamStats.goalsBalance,
+          efficiency: teamStats.efficiency };
+      }),
+    );
 
-    return homeData;
+    return awayData;
   }
 
   public static sortTeamsByPoints(teams: HomeData[]): HomeData[] {
@@ -91,19 +92,19 @@ class LeaderboardService {
           }
           return b.goalsBalance - a.goalsBalance;
         }
-        return b.totalVictories - a.totalVictories;
+        return a.totalVictories - b.totalVictories;
       }
       return b.totalPoints - a.totalPoints;
     });
   }
 
-  public static async getHomeLeaderboard(): Promise<HomeData[]> {
+  public static async getAwayLeaderboard(): Promise<HomeData[]> {
     const teams = await TeamService.getAllTeams();
     const matches = await MatchService.getIn(false);
-    const homeData = await this.getHomeData(teams, matches);
-    const result = await this.sortTeamsByPoints(homeData);
+    const awayData = await this.getAwayData(teams, matches);
+    const result = await this.sortTeamsByPoints(awayData);
     return result;
   }
 }
 
-export default LeaderboardService;
+export default LeaderboardServiceAway;
