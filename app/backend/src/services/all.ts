@@ -20,7 +20,7 @@ const initialPoints = {
 };
 
 class LeaderboardService {
-  public static calculateTotalPoints(homeTeamGoals: number, awayTeamGoals: number): TeamStats {
+  private static calculateTotalPoints(homeTeamGoals: number, awayTeamGoals: number): TeamStats {
     const result: TeamStats = { ...initialPoints };
     if (homeTeamGoals > awayTeamGoals) {
       result.totalPoints = 3;
@@ -34,13 +34,13 @@ class LeaderboardService {
     return result;
   }
 
-  public static calculateEfficiency(points: number, games: number): string {
+  private static calculateEfficiency(points: number, games: number): string {
     if (games === 0) return '0';
     const efficiency = (points / (games * 3)) * 100;
     return efficiency.toFixed(2).toString();
   }
 
-  public static async calculateTeamStats(matches: MatchAttributes[]): Promise<TeamStats> {
+  private static async calculateTeamStats(matches: MatchAttributes[]): Promise<TeamStats> {
     const result: TeamStats = { ...initialPoints };
     matches.forEach((match) => {
       if (!match.inProgress) {
@@ -103,30 +103,6 @@ class LeaderboardService {
     const homeData = await this.getHomeData(teams, matches);
     const result = await this.sortTeamsByPoints(homeData);
     return result;
-  }
-
-  // eslint-disable-next-line max-lines-per-function
-  public static async sumTeamData(homeTeam: HomeData[], awayTeam: HomeData[]): Promise<HomeData[]> {
-    const teamData: Record<string, HomeData> = {};
-
-    [...homeTeam, ...awayTeam].forEach((data) => {
-      const { name, ...rest } = data;
-
-      if (!teamData[name]) {
-        teamData[name] = { name, ...rest };
-      } else {
-        teamData[name].totalPoints += data.totalPoints;
-        teamData[name].totalGames += data.totalGames;
-        teamData[name].totalVictories += data.totalVictories;
-        teamData[name].totalDraws += data.totalDraws;
-        teamData[name].totalLosses += data.totalLosses;
-        teamData[name].goalsFavor += data.goalsFavor;
-        teamData[name].goalsOwn += data.goalsOwn;
-      }
-    });
-
-    const combinedData: HomeData[] = Object.values(teamData);
-    return this.sortTeamsByPoints(combinedData);
   }
 }
 
