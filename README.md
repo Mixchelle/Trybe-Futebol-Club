@@ -60,6 +60,16 @@
 <p>O Tryne Futebol Club é um projeto individual desenvolvido como parte do curso da Trybe. Através do uso de tecnologias modernas, como Docker, Sequelize e TDD, o projeto oferece uma solução completa para o gerenciamento e acompanhamento de times e partidas de futebol. Com a implementação de uma API robusta e funcionalidades interativas, o TFC proporciona aos usuários uma experiência informativa e dinâmica no mundo do futebol.</p>
 
 
+# Sobre os Requisitos
+
+Esse projeto é composto de 4 fluxos principais:
+1. Teams (Times)
+2. Users e Login (Pessoas Usuárias e Credenciais de acesso)
+3. Matches (Partidas)
+4. Leaderboards (Placares)
+
+
+
 ## Fluxo 1: Teams (Times)
 
 <details>
