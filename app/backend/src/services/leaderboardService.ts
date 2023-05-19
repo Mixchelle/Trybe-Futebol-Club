@@ -122,6 +122,11 @@ class LeaderboardService {
         teamData[name].totalLosses += data.totalLosses;
         teamData[name].goalsFavor += data.goalsFavor;
         teamData[name].goalsOwn += data.goalsOwn;
+        teamData[name].goalsBalance = teamData[name].goalsFavor - teamData[name].goalsOwn;
+        teamData[name].efficiency = this.calculateEfficiency(
+          teamData[name].totalPoints,
+          teamData[name].totalGames,
+        );
       }
     });
 
