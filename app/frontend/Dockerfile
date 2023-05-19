@@ -17,4 +17,7 @@ COPY . .
 EXPOSE 3000
 
 # Configurar o comando para iniciar a aplicação de acordo com as boas práticas
+
 ENTRYPOINT ["npm", "start"] 
+
+
