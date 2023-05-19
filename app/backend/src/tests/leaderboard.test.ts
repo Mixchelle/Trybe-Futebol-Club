@@ -3,11 +3,15 @@ import * as chai from 'chai';
 // @ts-ignore
 import chaiHttp = require('chai-http');
 import LeaderboardService from '../services/leaderboardService';
+import LeaderboardServiceAway from '../services/leaderboardServiceAway';
+import LeaderboardController from '../controllers/leaderboardController';
 import TeamService from '../services/teamService';
 import MatchService from '../services/matcheService';
 import expectedHomeData from './mockClass';
 import { app } from '../app';
 import awayMock from './mock/awayMock';
+import homeMock from './mock/homeMock';
+import allMock from './mock/allMock';
 
 interface Teste {
   homeTeamId: number;

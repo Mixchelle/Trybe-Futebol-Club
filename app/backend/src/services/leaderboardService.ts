@@ -105,16 +105,12 @@ class LeaderboardService {
     return result;
   }
 
-  // eslint-disable-next-line max-lines-per-function
   public static async sumTeamData(homeTeam: HomeData[], awayTeam: HomeData[]): Promise<HomeData[]> {
     const teamData: Record<string, HomeData> = {};
-
     [...homeTeam, ...awayTeam].forEach((data) => {
       const { name, ...rest } = data;
-
-      if (!teamData[name]) {
-        teamData[name] = { name, ...rest };
-      } else {
+      if (!teamData[name]) teamData[name] = { name, ...rest };
+      else {
         teamData[name].totalPoints += data.totalPoints;
         teamData[name].totalGames += data.totalGames;
         teamData[name].totalVictories += data.totalVictories;
@@ -123,15 +119,13 @@ class LeaderboardService {
         teamData[name].goalsFavor += data.goalsFavor;
         teamData[name].goalsOwn += data.goalsOwn;
         teamData[name].goalsBalance = teamData[name].goalsFavor - teamData[name].goalsOwn;
-        teamData[name].efficiency = this.calculateEfficiency(
-          teamData[name].totalPoints,
-          teamData[name].totalGames,
-        );
+        const e = this.calculateEfficiency(teamData[name].totalPoints, teamData[name].totalGames);
+        teamData[name].efficiency = e;
       }
     });
 
-    const combinedData: HomeData[] = Object.values(teamData);
-    return this.sortTeamsByPoints(combinedData);
+    // const combinedData: HomeData[] = Object.values(teamData);
+    return this.sortTeamsByPoints(Object.values(teamData));
   }
 }
 
