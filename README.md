@@ -1,4 +1,7 @@
-🌟 <h1>Trybe Futebol Club</h1> 🌟
+ <h1 align="center"> 🌟 Trybe Futebol Club 🌟 </h1> 
+
+![image](https://github.com/Mixchelle/Trybe-Futebol-Club/assets/110858556/e199ee05-ac39-4f95-b55d-67b35ba19333)
+
 
 <p>O Tryne Futebol Club (TFC) ⚽️ é um projeto individual desenvolvido como parte do curso da Trybe. O objetivo do projeto foi criar um site informativo sobre partidas e classificações de futebol (soccer), proporcionando uma experiência interativa aos usuários por meio de uma API.</p>
 <h2>Desenvolvimento 💻</h2>
