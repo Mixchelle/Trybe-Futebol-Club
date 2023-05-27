@@ -3,7 +3,7 @@
 ![image](https://github.com/Mixchelle/Trybe-Futebol-Club/assets/110858556/e199ee05-ac39-4f95-b55d-67b35ba19333)
 
 
-<p>O Tryne Futebol Club (TFC) ⚽️ é um projeto individual desenvolvido como parte do curso da Trybe. O objetivo do projeto foi criar um site informativo sobre partidas e classificações de futebol (soccer), proporcionando uma experiência interativa aos usuários por meio de uma API.</p>
+<p>O Trybe Futebol Club (TFC) ⚽️ é um projeto individual desenvolvido como parte do curso da Trybe. O objetivo do projeto foi criar um site informativo sobre partidas e classificações de futebol (soccer), proporcionando uma experiência interativa aos usuários por meio de uma API.</p>
 <h2>Desenvolvimento 💻</h2>
 <p>Durante o curso, fui responsável por desenvolver o projeto do TFC de forma individual. Um dos principais desafios foi a implementação de uma API seguindo a metodologia TDD (Test-Driven Development) 🧪, garantindo a qualidade e a robustez do código. Além disso, utilizei o docker-compose 🐳 para integrar as diferentes aplicações e garantir o funcionamento correto com o banco de dados.</p>
 <p>O backend foi desenvolvido com base nas regras de negócio fornecidas no projeto, utilizando o Sequelize para modelagem de dados e Docker para facilitar a execução e o gerenciamento dos serviços.</p>
@@ -52,7 +52,7 @@
 <p>Os testes foram organizados na pasta "app/backend/src/tests/" seguindo o exemplo do arquivo "app/backend/src/tests/change.me.test.ts".</p>
 <p>Garanti que todas as respostas respeitam os status do protocolo HTTP, conforme o esperado pelo REST.</p>
 <h2>Executando o Projeto 🚀</h2>
-<p>Para executar o projeto Tryne Futebol Club, siga as etapas abaixo:</p>
+<p>Para executar o projeto Trybe Futebol Club, siga as etapas abaixo:</p>
 <ol>
 <li>Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.</li>
 <li>Clone o repositório do projeto para o seu ambiente local.</li>
@@ -60,7 +60,7 @@
 <li>Execute o comando "npm run compose:up" para subir o projeto completo em containers.</li>
 </ol>
 <h2>Considerações Finais 🎉</h2>
-<p>O Tryne Futebol Club é um projeto individual desenvolvido como parte do curso da Trybe. Através do uso de tecnologias modernas, como Docker, Sequelize e TDD, o projeto oferece uma solução completa para o gerenciamento e acompanhamento de times e partidas de futebol. Com a implementação de uma API robusta e funcionalidades interativas, o TFC proporciona aos usuários uma experiência informativa e dinâmica no mundo do futebol.</p>
+<p>O Trybe Futebol Club é um projeto individual desenvolvido como parte do curso da Trybe. Através do uso de tecnologias modernas, como Docker, Sequelize e TDD, o projeto oferece uma solução completa para o gerenciamento e acompanhamento de times e partidas de futebol. Com a implementação de uma API robusta e funcionalidades interativas, o TFC proporciona aos usuários uma experiência informativa e dinâmica no mundo do futebol.</p>
 
 
 # Sobre os Requisitos
